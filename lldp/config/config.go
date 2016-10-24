@@ -25,11 +25,12 @@ package config
 
 const (
 	TX_RX_MODE_TxRx   = "TxRx"
-	TXRX              = 0
+	TXRX              = 1
 	TX_RX_MODE_TxOnly = "TxOnly"
-	TX_ONLY           = 1
+	TX_ONLY           = 2
 	TX_RX_MODE_RxOnly = "RxOnly"
-	RX_ONLY           = 2
+	RX_ONLY           = 3
+	INVALID_MODE      = 255
 )
 
 type Global struct {
@@ -42,8 +43,9 @@ type Global struct {
 
 // this is used for auto-discovery
 type Intf struct {
-	IntfRef string
-	Enable  bool
+	IntfRef  string
+	Enable   bool
+	TxRxMode string
 }
 
 // this is used to update configuration request coming from client to server

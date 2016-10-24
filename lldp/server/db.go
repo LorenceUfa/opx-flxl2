@@ -67,13 +67,16 @@ func (svr *LLDPServer) readLLDPIntfConfig() {
 			continue
 		}
 		gblInfo, _ := svr.lldpGblInfo[ifIndex]
-		debug.Logger.Info("IfIndex", ifIndex, "IfName:", dbEntry.IntfRef, "is set to", dbEntry.Enable)
+		debug.Logger.Info("IfIndex", ifIndex, "IfName:", dbEntry.IntfRef, "is set to", dbEntry.Enable,
+			"mode is:", dbEntry.TxRxMode)
 		switch dbEntry.Enable {
 		case true:
 			gblInfo.Enable()
 		case false:
 			gblInfo.Disable()
 		}
+		// restore mode during restart and always overwrite this with init value..
+		gblInfo.rxtxMode = getMode(dbEntry.TxRxMode)
 		svr.lldpGblInfo[ifIndex] = gblInfo
 	}
 	debug.Logger.Info("Done with LLDPIntf")

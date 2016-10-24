@@ -122,6 +122,8 @@ func (svr *LLDPServer) InitL2PortInfo(portInfo *config.PortInfo) {
 	// default is set to true but LLDP Object is auto-discover and hence we will enable it manually
 	// we will overwrite the value based on dbReead but default should always be true
 	intf.Enable()
+	// set default value for RX/TX mode so that it can be updated while db read
+	intf.rxtxMode = config.TXRX
 	svr.lldpGblInfo[portInfo.IfIndex] = intf
 	svr.lldpIntfStateSlice = append(svr.lldpIntfStateSlice, intf.Port.IfIndex)
 	debug.Logger.Debug("Updating IntfRef Map (key, value):(", portInfo.Name, ",", portInfo.IfIndex, ")")

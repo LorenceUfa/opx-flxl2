@@ -73,7 +73,7 @@ func (svr *LLDPServer) GetIntfs(idx, cnt int) (int, int, []config.Intf) {
 	var count int
 
 	if svr.lldpIntfStateSlice == nil {
-		debug.Logger.Info("No neighbor learned")
+		debug.Logger.Info("No LLDP interfaces created")
 		return 0, 0, nil
 	}
 	length := len(svr.lldpIntfStateSlice)
@@ -85,6 +85,7 @@ func (svr *LLDPServer) GetIntfs(idx, cnt int) (int, int, []config.Intf) {
 		if exists {
 			result[i].IntfRef = intf.Port.Name
 			result[i].Enable = intf.enable
+			result[i].TxRxMode = getModeString(intf.rxtxMode)
 			i++
 			j++
 		}
