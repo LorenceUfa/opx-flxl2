@@ -362,3 +362,35 @@ func (svr *LLDPServer) UpdateCache(sysInfo *config.SystemInfo) {
 		intf.TxInfo.SetCache(false)
 	}
 }
+
+/*  Api to get mode in uint8 format given a string
+ */
+func getMode(mode string) (rv uint8) {
+	switch mode {
+	case config.TX_RX_MODE_TxRx:
+		rv = config.TXRX
+	case config.TX_RX_MODE_TxOnly:
+		rv = config.TX_ONLY
+	case config.TX_RX_MODE_RxOnly:
+		rv = config.RX_ONLY
+	default:
+		rv = config.INVALID_MODE
+	}
+	return rv
+}
+
+/*  Api to get mode in string format given a uint8
+ */
+func getModeString(mode uint8) (rv string) {
+	switch mode {
+	case config.TXRX:
+		rv = config.TX_RX_MODE_TxRx
+	case config.TX_ONLY:
+		rv = config.TX_RX_MODE_TxOnly
+	case config.RX_ONLY:
+		rv = config.TX_RX_MODE_RxOnly
+	default:
+		rv = "invalid"
+	}
+	return rv
+}

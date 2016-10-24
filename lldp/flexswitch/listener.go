@@ -139,8 +139,8 @@ func (h *ConfigHandler) UpdateLLDPGlobal(origconfig *lldpd.LLDPGlobal,
 func (h *ConfigHandler) convertLLDPIntfEntryToThriftEntry(state config.Intf) *lldpd.LLDPIntf {
 	entry := lldpd.NewLLDPIntf()
 	entry.Enable = state.Enable
-	//entry.IfIndex = state.IfIndex
 	entry.IntfRef = state.IntfRef
+	entry.TxRxMode = state.TxRxMode
 	return entry
 }
 
