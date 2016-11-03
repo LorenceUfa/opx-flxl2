@@ -52,6 +52,8 @@ func init() {
 		AggOperDownDbList: make(map[string]LacpAggEvtCb),
 	}
 
+	initHwPortCreateDelCb()
+
 	ConfigAggMap = make(map[string]*LaAggConfig)
 	ConfigAggList = make([]*LaAggConfig, 0)
 }

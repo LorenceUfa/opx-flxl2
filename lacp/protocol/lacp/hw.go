@@ -30,6 +30,10 @@ import (
 	"l2/lacp/protocol/utils"
 )
 
+const (
+	LACP_HW_INTF = "LacpHwIntf"
+)
+
 // convert the lacp port names name to asic format string list
 func asicDPortBmpFormatGet(distPortList []string) string {
 	s := ""
@@ -65,4 +69,25 @@ func asicDHashModeGet(hashmode uint32) (laghash int32) {
 		laghash = hwconst.HASH_SEL_SRCDSTMAC
 	}
 	return laghash
+}
+
+func initHwPortCreateDelCb() {
+	RegisterLaPortCreateCb(LACP_HW_INTF, hwNotifyAggPortCreateDelete)
+	RegisterLaPortDeleteCb(LACP_HW_INTF, hwNotifyAggPortCreateDelete)
+}
+
+func hwNotifyAggPortCreateDelete(ifIndex int32) {
+	var p *LaAggPort
+	if LaFindPortById(uint16(ifIndex), &p) {
+		for _, client := range utils.GetAsicDPluginList() {
+			var list []int32
+			for _, port := range p.AggAttached.PortNumList {
+				list = append(list, int32(port))
+			}
+			ok := client.UpdateLagCfgIntfList(p.AggAttached.AggName, list)
+			if !ok {
+				utils.GlobalLogger.Err("UpdateLagCfgIntfList: Error updating LAG cfg list in HW")
+			}
+		}
+	}
 }
