@@ -835,21 +835,6 @@ func (muxm *LacpMuxMachine) DisableDistributing() {
 			for _, downcb := range LacpCbDb.PortDownDbList {
 				downcb(int32(p.PortNum))
 			}
-
-			if len(a.DistributedPortNumList) == 0 {
-				muxm.LacpMuxmLog("Sending Lag Delete to ASICD")
-				for _, client := range utils.GetAsicDPluginList() {
-					err := client.DeleteLag(a.HwAggId)
-					if err != nil {
-						muxm.LacpMuxmLog(fmt.Sprintln("ERROR Deleting Lag in HW", err))
-						return
-					}
-				}
-				a.HwAggId = 0
-				// no more ports active in group, lets mark the lag as operationally down
-				a.OperState = false
-				// TODO UPDATE SQL DB
-			}
 		}
 	}
 }

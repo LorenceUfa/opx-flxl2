@@ -866,6 +866,7 @@ func (la *LACPDServiceHandler) GetLaPortChannelState(IntfRef string) (*lacpd.LaP
 		if lacp.LaFindAggById(int(id), &a) {
 			pcs.IntfRef = a.AggName
 			pcs.IfIndex = int32(a.HwAggId)
+			pcs.PresentInHw = a.PresentInHw
 			pcs.LagType = ConvertLaAggTypeToModelLagType(a.AggType)
 			pcs.AdminState = "DOWN"
 			if a.AdminState {
@@ -933,6 +934,7 @@ func (la *LACPDServiceHandler) GetLaPortChannelState(IntfRef string) (*lacpd.LaP
 			*/
 			pcs.IntfRef = IntfRef
 			pcs.IfIndex = 0
+			pcs.PresentInHw = false
 			pcs.LagType = int32(ac.Type)
 
 			pcs.AdminState = "DOWN"
@@ -991,6 +993,7 @@ func (la *LACPDServiceHandler) GetBulkLaPortChannelState(fromIndex lacpd.Int, co
 				nextLagState = &lagStateList[validCount]
 				nextLagState.IntfRef = ac.Name
 				nextLagState.IfIndex = 0
+				nextLagState.PresentInHw = false
 				nextLagState.LagType = int32(ac.Type)
 				nextLagState.AdminState = "DOWN"
 				if ac.Enabled {
@@ -1032,6 +1035,7 @@ func (la *LACPDServiceHandler) GetBulkLaPortChannelState(fromIndex lacpd.Int, co
 				nextLagState = &lagStateList[validCount]
 				nextLagState.IntfRef = a.AggName
 				nextLagState.IfIndex = int32(a.HwAggId)
+				nextLagState.PresentInHw = a.PresentInHw
 				nextLagState.LagType = ConvertLaAggTypeToModelLagType(a.AggType)
 				nextLagState.AdminState = "DOWN"
 				if a.AdminState {

@@ -216,6 +216,9 @@ type LaAggregator struct {
 
 	// Similar to Port attrute L2/l3/Internal
 	ConfigMode string
+
+	// Indication of whether lag has been created in H/W
+	PresentInHw bool
 }
 
 func NewLaAggregator(ac *LaAggConfig) *LaAggregator {
@@ -285,6 +288,7 @@ func NewLaAggregator(ac *LaAggConfig) *LaAggregator {
 					a.LacpAggLog(fmt.Sprintln("Error creating LAG Group in HW", err))
 				} else {
 					a.HwAggId = ifindex
+					a.PresentInHw = true
 				}
 			}
 		}
@@ -388,6 +392,7 @@ func (a *LaAggregator) DeleteLaAgg() {
 		}
 	}
 	a.HwAggId = 0
+	a.PresentInHw = false
 	a.OperState = false
 
 	utils.DeleteEventMap(int32(a.AggId))
