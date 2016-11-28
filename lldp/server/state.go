@@ -108,7 +108,11 @@ func (svr *LLDPServer) GetIntfStates(idx, cnt int) (int, int, []config.IntfState
 		debug.Logger.Info("No neighbor learned")
 		return 0, 0, nil
 	}
-
+	if svr.Global != nil {
+		if svr.Global.Enable == false {
+			return 0, 0, nil
+		}
+	}
 	length := len(svr.lldpUpIntfStateSlice)
 	result := make([]config.IntfState, cnt)
 
@@ -139,7 +143,11 @@ func (svr *LLDPServer) GetIntfState(intfRef string) *config.IntfState {
 	if !exists {
 		return &entry
 	}
-
+	if svr.Global != nil {
+		if svr.Global.Enable == false {
+			return nil
+		}
+	}
 	success := svr.PopulateTLV(ifIndex, &entry)
 	if success {
 		return &entry

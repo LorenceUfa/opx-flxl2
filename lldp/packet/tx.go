@@ -282,6 +282,7 @@ func (t *TX) DeleteCacheFrame() {
  */
 func (t *TX) StopTxTimer() {
 	if t.TxTimer != nil {
+		debug.Logger.Debug("tx timer stopped")
 		t.TxTimer.Stop()
 		t.TxTimer = nil
 	}

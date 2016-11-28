@@ -43,6 +43,9 @@ func (intf *LLDPGlobalInfo) ReceiveFrames(lldpRxPktCh chan InPktChannel) {
 		case pkt, ok := <-in:
 			if ok {
 				lldpRxPktCh <- InPktChannel{pkt, intf.Port.IfIndex}
+			} else {
+				debug.Logger.Info("quit for ifIndex", intf.Port.Name, "rx exiting go routine")
+				return
 			}
 		case <-intf.RxKill:
 			debug.Logger.Info("quit for ifIndex", intf.Port.Name, "rx exiting go routine")
