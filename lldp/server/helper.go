@@ -77,12 +77,15 @@ func (intf *LLDPGlobalInfo) DeletePcapHandler() {
 	if intf.PcapHandle != nil {
 		// Send go routine kill signal right away before even we do anything else
 		if intf.RxInfo.RxRunning {
+			debug.Logger.Debug("sending go routine kill signal for:", intf.Port.Name)
 			intf.RxKill <- true
+			intf.RxInfo.RxRunning = false
 			<-intf.RxKill
 		}
 		// @FIXME: some bug in close handling that causes 5 mins delay
 		intf.PcapHandle.Close()
 		intf.PcapHandle = nil
+		debug.Logger.Debug("pcap closed for:", intf.Port.Name)
 	}
 }
 

@@ -221,35 +221,42 @@ func (svr *LLDPServer) StartRxTx(ifIndex int32, rxtxMode uint8) {
 				"failed and hence we will not start LLDP on the port")
 			return
 		}
-		debug.Logger.Info("Start lldp frames rx/tx for port:", intf.Port.Name, "ifIndex:", intf.Port.IfIndex)
+		debug.Logger.Info("Pcap created for lldp frames for port:", intf.Port.Name, "ifIndex:", intf.Port.IfIndex)
 	}
 	svr.AddPortToUpState(intf.Port.IfIndex)
 	// Everything set up, so now lets start with receiving frames and transmitting frames go routine...
-	//If RX routine not running start it
+	// If RX routine not running start it
 	if rxtxMode != config.TX_ONLY {
+		debug.Logger.Debug("mode is not tx only")
 		if !intf.RxInfo.RxRunning {
+			debug.Logger.Debug("start ReceiveFrames go routine for:", intf.Port.Name)
 			go intf.ReceiveFrames(svr.lldpRxPktCh)
 			intf.RxInfo.RxRunning = true
 		}
 	} else {
-		//RX go routine could have been spawned due to earlier txrx or rx only modes
+		// RX go routine could have been spawned due to earlier txrx or rx only modes
 		if intf.RxInfo.RxRunning {
+			debug.Logger.Debug("RX go routine could have been spawned due to earlier txrx or rx only modes, and hence killing rx routine for:", intf.Port.Name)
 			intf.RxKill <- true
 			intf.RxInfo.RxRunning = false
 			<-intf.RxKill
 			intf.counter.Rcvd = 0
 		}
 	}
-	//If TX routine not running start it
+	// If TX routine not running start it
 	if rxtxMode != config.RX_ONLY {
+		debug.Logger.Debug("mode is not rx only")
 		if intf.TxInfo.TxTimer == nil {
+			debug.Logger.Debug("Start tx timer for:", intf.Port.Name)
 			intf.StartTxTimer(svr.lldpTxPktCh)
 		}
 	} else {
-		//TX go routine could have been spawned due to earlier txrx or tx only modes
+		// TX go routine could have been spawned due to earlier txrx or tx only modes
+		debug.Logger.Debug("TX go routine could have been spawned due to earlier txrx or tx only mode stopping tx timer for:", intf.Port.Name)
 		intf.TxInfo.StopTxTimer()
 		intf.counter.Send = 0
 	}
+	debug.Logger.Info("started rx tx for port:", intf.Port.Name)
 	svr.lldpGblInfo[ifIndex] = intf
 	return
 }
@@ -265,10 +272,13 @@ func (svr *LLDPServer) StopRxTx(ifIndex int32) {
 	}
 
 	// stop the timer
+	debug.Logger.Debug("stop tx timer for:", intf.Port.Name)
 	intf.TxInfo.StopTxTimer()
 	// Delete Pcap Handler
+	debug.Logger.Debug("delete pcap handler for:", intf.Port.Name)
 	intf.DeletePcapHandler()
 	// invalid the cache information
+	debug.Logger.Debug("invalidate cache information for:", intf.Port.Name)
 	intf.TxInfo.DeleteCacheFrame()
 	intf.counter.Rcvd = 0
 	intf.counter.Send = 0
@@ -322,8 +332,7 @@ func (svr *LLDPServer) UpdateL2IntfStateChange(ifIndex int32, state string) {
 	}
 	switch state {
 	case "UP":
-		debug.Logger.Debug("State UP notification for " + intf.Port.Name + " ifIndex: " +
-			strconv.Itoa(int(intf.Port.IfIndex)))
+		debug.Logger.Debug("State UP notification for " + intf.Port.Name + " ifIndex: " + strconv.Itoa(int(intf.Port.IfIndex)))
 		intf.Port.OperState = LLDP_PORT_STATE_UP
 		svr.lldpGblInfo[ifIndex] = intf
 		if intf.isEnabled() {
@@ -331,8 +340,7 @@ func (svr *LLDPServer) UpdateL2IntfStateChange(ifIndex int32, state string) {
 			svr.StartRxTx(ifIndex, intf.rxtxMode)
 		}
 	case "DOWN":
-		debug.Logger.Debug("State DOWN notification for " + intf.Port.Name + " ifIndex: " +
-			strconv.Itoa(int(intf.Port.IfIndex)))
+		debug.Logger.Debug("State DOWN notification for " + intf.Port.Name + " ifIndex: " + strconv.Itoa(int(intf.Port.IfIndex)))
 		intf.Port.OperState = LLDP_PORT_STATE_DOWN
 		svr.lldpGblInfo[ifIndex] = intf
 		if intf.isEnabled() {
