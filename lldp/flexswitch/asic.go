@@ -125,14 +125,12 @@ func (p *AsicPlugin) getPortStates() []*config.PortInfo {
 			}
 			pObj, err := p.asicdClient.GetPort(obj.IntfRef)
 			if err != nil {
-				debug.Logger.Err(fmt.Sprintln("Getting mac address for",
-					obj.Name, "failed, error:", err))
+				debug.Logger.Err(fmt.Sprintln("Getting mac address for", obj.Name, "failed, error:", err))
 			} else {
 				port.MacAddr = pObj.MacAddr
 				port.Description = pObj.Description
 			}
-			debug.Logger.Debug("Adding port Name, OperState, IfIndex:", port.Name, port.OperState, port.IfIndex,
-				"to portStates")
+			debug.Logger.Debug("Adding port Name, OperState, IfIndex:", port, "to portStates")
 			portStates = append(portStates, port)
 		}
 		if more == false {
