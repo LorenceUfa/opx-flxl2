@@ -281,9 +281,12 @@ func EncodeMgmtTLV(tlv *layers.LLDPMgmtAddress) []byte {
 
 func EncodePvidTLV(tlv *layers.LLDPOrgSpecificTLV) []byte {
 	b := make([]byte, 4 /*uint32 oui*/)
-	binary.BigEndian.PutUint32(b[0:4], uint32(tlv.OUI))
-	b = append(b, tlv.SubType) // 1 byte
+	ouiInfo := uint32(tlv.OUI)<<8 | uint32(tlv.SubType)
+	binary.BigEndian.PutUint32(b[0:4], ouiInfo)
+	//binary.BigEndian.PutUint32(b[0:4], uint32(tlv.OUI))
+	//b = append(b, tlv.SubType) // 1 byte
 	b = append(b, tlv.Info...) // [] byte
+	debug.Logger.Debug("byte returned", b)
 	return b
 }
 
