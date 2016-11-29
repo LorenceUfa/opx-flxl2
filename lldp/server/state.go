@@ -56,6 +56,8 @@ func (svr *LLDPServer) PopulateTLV(ifIndex int32, entry *config.IntfState) bool 
 		entry.EnabledCapabilities = intf.GetEnabledCap()
 		entry.PeerHostName = intf.GetPeerHostName()
 		entry.SystemDescription = intf.GetSystemDescription()
+		entry.PortDescription = intf.GetPortDescription()
+		entry.VlanId = intf.GetPvid()
 	}
 
 	entry.IfIndex = intf.Port.IfIndex

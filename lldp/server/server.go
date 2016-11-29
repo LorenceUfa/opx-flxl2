@@ -472,12 +472,19 @@ func (svr *LLDPServer) ProcessRcvdPkt(rcvdInfo InPktChannel) {
 }
 
 func (svr *LLDPServer) handlePortAttrChange(portAttrMsg *config.PortAttrMsg) {
+	debug.Logger.Info("handle port attribute notification msg:", *portAttrMsg)
 	intf, exists := svr.lldpGblInfo[portAttrMsg.IfIndex]
 	if !exists {
 		return
 	}
-	debug.Logger.Debug("Updating Description for Port:", intf.Port.Name)
-	intf.Port.Description = portAttrMsg.Description
+	if portAttrMsg.Description != "" {
+		debug.Logger.Debug("Updating Description for Port:", intf.Port.Name)
+		intf.Port.Description = portAttrMsg.Description
+	}
+	if portAttrMsg.Pvid != config.INVALID_PVID {
+		debug.Logger.Debug("Updating Pvid for Port:", intf.Port.Name)
+		intf.Port.Pvid = portAttrMsg.Pvid
+	}
 	intf.TxInfo.SetCache(false)
 	svr.lldpGblInfo[portAttrMsg.IfIndex] = intf
 }

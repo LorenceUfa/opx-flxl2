@@ -115,6 +115,11 @@ func (p *RX) Process(rxInfo *RX, pkt gopacket.Packet) (int, error) {
 	}
 	// Store lldp link layer optional tlv information
 	*rxInfo.RxLinkInfo = *lldpLayerInfo.(*layers.LinkLayerDiscoveryInfo)
+	// LLDPInfo8021 represents the information carried in 802.1 Org-specific TLVs
+	rxInfo.OrgTLV802_1, err = rxInfo.RxLinkInfo.Decode8021()
+	if err != nil {
+		debug.Logger.Warning("failed to decode 802.11 TLV")
+	}
 
 	return event, nil
 }

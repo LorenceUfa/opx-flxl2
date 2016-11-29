@@ -203,8 +203,24 @@ func (t *TX) createPayload(srcmac []byte, port config.PortInfo, sysInfo *config.
 		tlvType++
 	}
 
-	// After all TLV's are added we need to go ahead and Add LLDPTLVEnd
+	// add organization specific tlv for pvid
 	tlv := &layers.LinkLayerDiscoveryValue{}
+	tlv.Type = layers.LLDPTLVOrgSpecific
+	temp := make([]byte, 4)
+	binary.BigEndian.PutUint32(temp[0:4], uint32(port.Pvid))
+	ieeeOui8021 := &layers.LLDPOrgSpecificTLV{
+		OUI:     layers.IEEEOUI8021,
+		SubType: layers.LLDP8021SubtypePortVLANID,
+	}
+	ieeeOui8021.Info = append(ieeeOui8021.Info, temp...)
+	tlv.Value = EncodePvidTLV(ieeeOui8021)
+	if len(tlv.Value) > 0 {
+		tlv.Length = uint16(len(tlv.Value))
+		payload = append(payload, EncodeTLV(tlv)...)
+	}
+
+	// After all TLV's are added we need to go ahead and Add LLDPTLVEnd
+	tlv = &layers.LinkLayerDiscoveryValue{}
 	tlv.Type = layers.LLDPTLVEnd
 	tlv.Length = 0
 	payload = append(payload, EncodeTLV(tlv)...)
@@ -260,6 +276,14 @@ func EncodeMgmtTLV(tlv *layers.LLDPMgmtAddress) []byte {
 	temp[4] = 0
 	b = append(b, temp...)
 	debug.Logger.Debug("byte returned", b)
+	return b
+}
+
+func EncodePvidTLV(tlv *layers.LLDPOrgSpecificTLV) []byte {
+	b := make([]byte, 4 /*uint32 oui*/)
+	binary.BigEndian.PutUint32(b[0:4], uint32(tlv.OUI))
+	b = append(b, tlv.SubType) // 1 byte
+	b = append(b, tlv.Info...) // [] byte
 	return b
 }
 

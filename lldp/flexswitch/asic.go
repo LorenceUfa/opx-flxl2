@@ -109,9 +109,7 @@ func (p *AsicPlugin) getPortStates() []*config.PortInfo {
 	for {
 		bulkInfo, err := p.asicdClient.GetBulkPortState(asicdServices.Int(currMarker), asicdServices.Int(count))
 		if err != nil {
-			debug.Logger.Err(fmt.Sprintln(": getting bulk port config"+
-				" from asicd failed with reason", err))
-			//return
+			debug.Logger.Err(fmt.Sprintln(": getting bulk port config from asicd failed with reason", err))
 			break
 		}
 		objCount = int(bulkInfo.Count)
@@ -122,9 +120,10 @@ func (p *AsicPlugin) getPortStates() []*config.PortInfo {
 			port := &config.PortInfo{
 				IfIndex:   obj.IfIndex,
 				OperState: obj.OperState,
-				Name:      obj.IntfRef, //obj.Name,
+				Name:      obj.IntfRef,
+				Pvid:      obj.Pvid,
 			}
-			pObj, err := p.asicdClient.GetPort(obj.IntfRef) //obj.Name)
+			pObj, err := p.asicdClient.GetPort(obj.IntfRef)
 			if err != nil {
 				debug.Logger.Err(fmt.Sprintln("Getting mac address for",
 					obj.Name, "failed, error:", err))
@@ -219,9 +218,10 @@ func (p *AsicPlugin) listenAsicdUpdates() {
 			}
 
 			debug.Logger.Debug("Received port attribute change message:", portAttrMsg)
-			if (portAttrMsg.AttrMask & commonDefs.PORT_ATTR_DESCRIPTION) == commonDefs.PORT_ATTR_DESCRIPTION {
+			if (portAttrMsg.AttrMask&commonDefs.PORT_ATTR_DESCRIPTION) == commonDefs.PORT_ATTR_DESCRIPTION ||
+				(portAttrMsg.AttrMask&commonDefs.PORT_ATTR_PVID) == commonDefs.PORT_ATTR_PVID {
 				debug.Logger.Debug("Received description attribute change")
-				api.SendPortAttrChange(portAttrMsg.IfIndex, portAttrMsg.Description)
+				api.SendPortAttrChange(portAttrMsg.IfIndex, portAttrMsg.Description, portAttrMsg.Pvid)
 			}
 		}
 	}

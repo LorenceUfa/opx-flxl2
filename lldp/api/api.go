@@ -173,6 +173,10 @@ func GetLLDPGlobalState(vrf string) (*config.GlobalState, error) {
 	return lldpapi.server.GetGlobalState(vrf), nil
 }
 
-func SendPortAttrChange(ifIndex int32, desc string) {
-	lldpapi.server.PortAttrCh <- &config.PortAttrMsg{ifIndex, desc}
+func SendPortAttrChange(ifIndex int32, desc string, pvid int32) {
+	if pvid == 0 {
+		lldpapi.server.PortAttrCh <- &config.PortAttrMsg{ifIndex, desc, config.INVALID_PVID}
+	} else {
+		lldpapi.server.PortAttrCh <- &config.PortAttrMsg{ifIndex, desc, pvid}
+	}
 }

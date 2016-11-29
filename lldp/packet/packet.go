@@ -44,6 +44,7 @@ type RX struct {
 	// lldp rx information
 	RxFrame         *layers.LinkLayerDiscovery
 	RxLinkInfo      *layers.LinkLayerDiscoveryInfo
+	OrgTLV802_1     layers.LLDPInfo8021
 	ClearCacheTimer *time.Timer
 
 	// cache last packet and see if we need to update current information or not
