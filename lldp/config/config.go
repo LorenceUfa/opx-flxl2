@@ -114,3 +114,8 @@ type SystemInfo struct {
 	SwVersion   string
 	Description string
 }
+
+type PortAttrMsg struct {
+	IfIndex     int32
+	Description string
+}

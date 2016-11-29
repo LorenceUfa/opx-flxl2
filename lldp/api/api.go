@@ -172,3 +172,7 @@ func UpdateCache(sysInfo *config.SystemInfo) {
 func GetLLDPGlobalState(vrf string) (*config.GlobalState, error) {
 	return lldpapi.server.GetGlobalState(vrf), nil
 }
+
+func SendPortAttrChange(ifIndex int32, desc string) {
+	lldpapi.server.PortAttrCh <- &config.PortAttrMsg{ifIndex, desc}
+}

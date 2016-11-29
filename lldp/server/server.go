@@ -73,11 +73,12 @@ func (svr *LLDPServer) InitGlobalDS() {
 	// 30 seconds. So, we can have the leavrage the pcap timeout (read from
 	// buffer) to be 1 second.
 	svr.lldpTimeout = 500 * time.Millisecond
-	svr.GblCfgCh = make(chan *config.Global, 2)
+	svr.GblCfgCh = make(chan *config.Global)
 	svr.IntfCfgCh = make(chan *config.IntfConfig, LLDP_PORT_CONFIG_CHANNEL_SIZE)
 	svr.IfStateCh = make(chan *config.PortState, LLDP_PORT_STATE_CHANGE_CHANNEL_SIZE)
 	svr.UpdateCacheCh = make(chan *config.SystemInfo, 1)
 	svr.EventCh = make(chan config.EventInfo, 10)
+	svr.PortAttrCh = make(chan *config.PortAttrMsg)
 	svr.counter.Send = 0
 	svr.counter.Rcvd = 0
 	// All Plugin Info
@@ -470,6 +471,17 @@ func (svr *LLDPServer) ProcessRcvdPkt(rcvdInfo InPktChannel) {
 	debug.Logger.Debug("Done Processing Packet for port:", intf.Port.Name)
 }
 
+func (svr *LLDPServer) handlePortAttrChange(portAttrMsg *config.PortAttrMsg) {
+	intf, exists := svr.lldpGblInfo[portAttrMsg.IfIndex]
+	if !exists {
+		return
+	}
+	debug.Logger.Debug("Updating Description for Port:", intf.Port.Name)
+	intf.Port.Description = portAttrMsg.Description
+	intf.TxInfo.SetCache(false)
+	svr.lldpGblInfo[portAttrMsg.IfIndex] = intf
+}
+
 /* To handle all the channels in lldp server... For detail look at the
  * LLDPInitGlobalDS api to see which all channels are getting initialized
  */
@@ -528,6 +540,11 @@ func (svr *LLDPServer) ChannelHandler() {
 				continue
 			}
 			svr.SysPlugin.PublishEvent(eventInfo)
+		case portAttrMsg, ok := <-svr.PortAttrCh:
+			if !ok {
+				continue
+			}
+			svr.handlePortAttrChange(portAttrMsg)
 		}
 	}
 }

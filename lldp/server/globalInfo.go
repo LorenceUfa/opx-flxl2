@@ -111,6 +111,8 @@ type LLDPServer struct {
 	UpdateCacheCh chan *config.SystemInfo
 	// Event Publish channel for server
 	EventCh chan config.EventInfo
+	// Port Attribute change channel
+	PortAttrCh chan *config.PortAttrMsg
 
 	// Frames Counter
 	counter Frame

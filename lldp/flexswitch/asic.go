@@ -35,6 +35,7 @@ import (
 	"l2/lldp/utils"
 	"strconv"
 	"time"
+	"utils/commonDefs"
 	"utils/ipcutils"
 )
 
@@ -208,6 +209,19 @@ func (p *AsicPlugin) listenAsicdUpdates() {
 				api.SendPortStateChange(l2IntfStateNotifyMsg.IfIndex, "UP")
 			} else {
 				api.SendPortStateChange(l2IntfStateNotifyMsg.IfIndex, "DOWN")
+			}
+		case asicdCommonDefs.NOTIFY_PORT_ATTR_CHANGE:
+			var portAttrMsg asicdCommonDefs.PortAttrChangeNotifyMsg
+			err = json.Unmarshal(msg.Msg, &portAttrMsg)
+			if err != nil {
+				debug.Logger.Err("Unable to Unmarshal Port Attr Change Notify message err:", err)
+				continue
+			}
+
+			debug.Logger.Debug("Received port attribute change message:", portAttrMsg)
+			if (portAttrMsg.AttrMask & commonDefs.PORT_ATTR_DESCRIPTION) == commonDefs.PORT_ATTR_DESCRIPTION {
+				debug.Logger.Debug("Received description attribute change")
+				api.SendPortAttrChange(portAttrMsg.IfIndex, portAttrMsg.Description)
 			}
 		}
 	}
