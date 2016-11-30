@@ -35,6 +35,7 @@ import (
 	"l2/lldp/utils"
 	"strconv"
 	"time"
+	"utils/commonDefs"
 	"utils/ipcutils"
 )
 
@@ -108,9 +109,7 @@ func (p *AsicPlugin) getPortStates() []*config.PortInfo {
 	for {
 		bulkInfo, err := p.asicdClient.GetBulkPortState(asicdServices.Int(currMarker), asicdServices.Int(count))
 		if err != nil {
-			debug.Logger.Err(fmt.Sprintln(": getting bulk port config"+
-				" from asicd failed with reason", err))
-			//return
+			debug.Logger.Err(fmt.Sprintln(": getting bulk port config from asicd failed with reason", err))
 			break
 		}
 		objCount = int(bulkInfo.Count)
@@ -121,18 +120,17 @@ func (p *AsicPlugin) getPortStates() []*config.PortInfo {
 			port := &config.PortInfo{
 				IfIndex:   obj.IfIndex,
 				OperState: obj.OperState,
-				Name:      obj.IntfRef, //obj.Name,
+				Name:      obj.IntfRef,
+				Pvid:      obj.Pvid,
 			}
-			pObj, err := p.asicdClient.GetPort(obj.IntfRef) //obj.Name)
+			pObj, err := p.asicdClient.GetPort(obj.IntfRef)
 			if err != nil {
-				debug.Logger.Err(fmt.Sprintln("Getting mac address for",
-					obj.Name, "failed, error:", err))
+				debug.Logger.Err(fmt.Sprintln("Getting mac address for", obj.Name, "failed, error:", err))
 			} else {
 				port.MacAddr = pObj.MacAddr
 				port.Description = pObj.Description
 			}
-			debug.Logger.Debug("Adding port Name, OperState, IfIndex:", port.Name, port.OperState, port.IfIndex,
-				"to portStates")
+			debug.Logger.Debug("Adding port Name, OperState, IfIndex:", port, "to portStates")
 			portStates = append(portStates, port)
 		}
 		if more == false {
@@ -208,6 +206,20 @@ func (p *AsicPlugin) listenAsicdUpdates() {
 				api.SendPortStateChange(l2IntfStateNotifyMsg.IfIndex, "UP")
 			} else {
 				api.SendPortStateChange(l2IntfStateNotifyMsg.IfIndex, "DOWN")
+			}
+		case asicdCommonDefs.NOTIFY_PORT_ATTR_CHANGE:
+			var portAttrMsg asicdCommonDefs.PortAttrChangeNotifyMsg
+			err = json.Unmarshal(msg.Msg, &portAttrMsg)
+			if err != nil {
+				debug.Logger.Err("Unable to Unmarshal Port Attr Change Notify message err:", err)
+				continue
+			}
+
+			debug.Logger.Debug("Received port attribute change message:", portAttrMsg)
+			if (portAttrMsg.AttrMask&commonDefs.PORT_ATTR_DESCRIPTION) == commonDefs.PORT_ATTR_DESCRIPTION ||
+				(portAttrMsg.AttrMask&commonDefs.PORT_ATTR_PVID) == commonDefs.PORT_ATTR_PVID {
+				debug.Logger.Debug("Received description attribute change")
+				api.SendPortAttrChange(portAttrMsg.IfIndex, portAttrMsg.Description, portAttrMsg.Pvid)
 			}
 		}
 	}

@@ -319,6 +319,20 @@ func (intf *LLDPGlobalInfo) GetSystemDescription() string {
 	return intf.RxInfo.RxLinkInfo.SysDescription
 }
 
+/*  Get Peer Description Information
+ *
+ */
+func (intf *LLDPGlobalInfo) GetPortDescription() string {
+	return intf.RxInfo.RxLinkInfo.PortDescription
+}
+
+/*  Get PVID Information
+ *
+ */
+func (intf *LLDPGlobalInfo) GetPvid() int32 {
+	return int32(intf.RxInfo.OrgTLV802_1.PVID)
+}
+
 /*  dump received lldp frame and other TX information
  */
 func (intf LLDPGlobalInfo) DumpFrame() {

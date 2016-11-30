@@ -33,6 +33,10 @@ const (
 	INVALID_MODE      = 255
 )
 
+const (
+	INVALID_PVID = -1
+)
+
 type Global struct {
 	Vrf             string
 	Enable          bool
@@ -61,6 +65,7 @@ type PortInfo struct {
 	OperState   string
 	MacAddr     string
 	Description string
+	Pvid        int32
 }
 
 type PortState struct {
@@ -78,6 +83,8 @@ type IntfState struct {
 	PeerMac             string
 	PeerPort            string
 	PeerHostName        string
+	PortDescription     string
+	VlanId              int32
 	HoldTime            string
 	SystemDescription   string
 	SystemCapabilities  string
@@ -113,4 +120,10 @@ type SystemInfo struct {
 	SwitchMac   string
 	SwVersion   string
 	Description string
+}
+
+type PortAttrMsg struct {
+	IfIndex     int32
+	Description string
+	Pvid        int32
 }
