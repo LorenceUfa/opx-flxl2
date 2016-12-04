@@ -221,11 +221,14 @@ func (txm *LacpTxMachine) LacpTxMachineOn(m fsm.Machine, data interface{}) fsm.S
 			if txm.txPending > 0 && txm.txPkts < 3 {
 				txm.txPending--
 				txm.TxmEvents <- utils.MachineEvent{
+
 					E:   LacpTxmEventNtt,
 					Src: TxMachineModuleStr}
 			}
 		} else {
-			txm.txPending++
+			if txm.txPending < 5 {
+				txm.txPending++
+			}
 			txm.LacpTxmLog(fmt.Sprintf("ON: Delay packets %d", txm.txPending))
 			nextState = LacpTxmStateDelayed
 		}
