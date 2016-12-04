@@ -899,7 +899,7 @@ func (la *LACPDServiceHandler) GetLaPortChannelState(IntfRef string) (*lacpd.LaP
 				}
 			}
 		} else {
-			return pcs, errors.New(fmt.Sprintf("LACP: Unable to find port channel from LagId %s", IntfRef))
+			return nil, errors.New(fmt.Sprintln("LACP: Unable to find port channel from LagId", IntfRef))
 		}
 	} else {
 		//fmt.Println("Lacp Global Disabled, returning saved config map=%v intf=%s\n", lacp.ConfigAggMap, IntfRef)
@@ -959,6 +959,8 @@ func (la *LACPDServiceHandler) GetLaPortChannelState(IntfRef string) (*lacpd.LaP
 					pcs.IntfRefList = append(pcs.IntfRefList, name)
 				}
 			}
+		} else {
+			return nil, errors.New(fmt.Sprintln("LACP: Unable to find port channel from LagId", IntfRef, "and LACP Global is disabled"))
 		}
 	}
 	return pcs, nil
